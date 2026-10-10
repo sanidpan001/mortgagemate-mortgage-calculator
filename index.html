@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MortgageMate — Mortgage Calculator with Tax, Insurance, PMI & Extra Payments</title>
+<meta name="description" content="MortgageMate is a free mortgage calculator with property tax, home insurance, PMI, extra-payment payoff boost and a full amortization table with CSV download.">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Inter',system-ui,sans-serif;background:#faf6f0;color:#292524}
+.font-display{font-family:'Fraunces',serif}
+input[type=number]{-moz-appearance:textfield} input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+.toggle{accent-color:#7f1d1d;width:1.15rem;height:1.15rem}
+:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
+.donut-legend-dot{width:12px;height:12px;border-radius:9999px;display:inline-block}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How is my monthly mortgage payment calculated?","acceptedAnswer":{"@type":"Answer","text":"Your monthly payment combines principal and interest on the loan with, if you include them, property tax, home insurance and PMI divided across twelve months. MortgageMate shows each part separately so you can see exactly where every dollar goes."}},{"@type":"Question","name":"What is PMI and when does it stop?","acceptedAnswer":{"@type":"Answer","text":"Private mortgage insurance, or PMI, protects the lender when your down payment is under 20 percent. In MortgageMate PMI is applied while your remaining balance is above 80 percent of the home price and drops away once you cross that threshold."}},{"@type":"Question","name":"How much can extra monthly payments save me?","acceptedAnswer":{"@type":"Answer","text":"Extra payments go straight to principal, so every extra dollar reduces the balance that interest is charged on. MortgageMate compares your loan with and without the extra amount and shows the interest saved and the months shaved off your payoff date."}},{"@type":"Question","name":"Should I include property tax and insurance in my estimate?","acceptedAnswer":{"@type":"Answer","text":"Yes, if you want a realistic monthly budget. Tax and insurance can add hundreds of dollars a month. Most lenders collect them through escrow, so including them in MortgageMate gives you the true amount that will leave your account."}},{"@type":"Question","name":"What is an amortization table and how do I use it?","acceptedAnswer":{"@type":"Answer","text":"An amortization table lists every monthly payment, splitting it into principal, interest, tax, insurance and PMI, and shows your remaining balance after each payment. You can download it as a CSV file from MortgageMate to open in any spreadsheet."}},{"@type":"Question","name":"Does a shorter loan term really save that much interest?","acceptedAnswer":{"@type":"Answer","text":"Yes. A 15-year loan has a higher monthly payment than a 30-year loan on the same amount, but you pay far less total interest because the balance falls faster and the rate is often lower. Try both terms in MortgageMate to compare the totals side by side."}}]}
+</script>
+</head>
+<body id="top">
+<header class="sticky top-0 z-50 bg-[#faf6f0]/95 backdrop-blur border-b-2 border-[#7f1d1d]/15">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+    <a href="#top" class="flex items-center gap-2 text-[#7f1d1d] font-display font-black text-2xl">🏠 MortgageMate</a>
+    <nav class="flex gap-5 text-sm font-semibold">
+      <a href="#top" class="hover:text-[#7f1d1d]">Home</a>
+      <a href="https://fixoraa.tech" class="hover:text-[#7f1d1d]">More Tools</a>
+    </nav>
+  </div>
+</header>
+
+<div class="no-print mx-auto max-w-6xl px-4 sm:px-6 pt-4" role="complementary" aria-label="Advertisement">
+  <div class="mx-auto text-center" style="max-width:728px">
+    <span class="block text-[10px] tracking-[0.18em] uppercase text-slate-400 mb-1.5">Advertisement</span>
+    <div class="flex justify-center overflow-hidden">
+      <div class="origin-top scale-[0.44] sm:scale-100 shrink-0">
+        <script>
+          atOptions = { 'key' : '4e68ac77881c17fe128a46565d9a4e8c', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };
+        </script>
+        <script src="https://www.highrevenueformat.com/4e68ac77881c17fe128a46565d9a4e8c/invoke.js"></script>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+  <div class="text-center max-w-3xl mx-auto">
+    <span class="inline-block bg-[#7f1d1d] text-white text-xs font-bold px-3 py-1 rounded-full tracking-wide">✦ Unlimited Free Usage</span>
+    <h1 class="font-display text-4xl sm:text-5xl font-black text-[#7f1d1d] mt-4">Mortgage Calculator</h1>
+    <p class="mt-3 text-stone-600">See the real monthly payment — principal, interest, tax, insurance and PMI in one dashboard — then test how extra payments pull your payoff date closer.</p>
+  </div>
+
+  <section class="mt-8 grid lg:grid-cols-5 gap-6 items-start">
+    <!-- Inputs -->
+    <div class="lg:col-span-2 bg-white rounded-3xl shadow-lg border border-stone-200 p-6 space-y-5">
+      <h2 class="font-display font-bold text-xl text-[#7f1d1d]">Your loan</h2>
+      <div><label class="text-sm font-semibold" for="homePrice">Home price ($)</label><input id="homePrice" type="number" min="0" value="450000" class="mt-1 w-full border-2 border-stone-200 rounded-xl px-3 py-2.5 focus:border-[#7f1d1d]"></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-sm font-semibold" for="downPayment">Down payment ($)</label><input id="downPayment" type="number" min="0" value="90000" class="mt-1 w-full border-2 border-stone-200 rounded-xl px-3 py-2.5"></div>
+        <div><label class="text-sm font-semibold" for="downPct">Down (%)</label><input id="downPct" type="number" min="0" max="100" value="20" class="mt-1 w-full border-2 border-stone-200 rounded-xl px-3 py-2.5"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-sm font-semibold" for="rate">Interest rate (% / yr)</label><input id="rate" type="number" step="0.01" min="0" value="6.5" class="mt-1 w-full border-2 border-stone-200 rounded-xl px-3 py-2.5"></div>
+        <div><label class="text-sm font-semibold" for="term">Term (years)</label>
+          <select id="term" class="mt-1 w-full border-2 border-stone-200 rounded-xl px-3 py-2.5 bg-white"><option>30</option><option>20</option><option>15</option><option>10</option></select></div>
+      </div>
+
+      <div class="border-t border-dashed pt-4 space-y-4">
+        <label class="flex items-center gap-2 font-semibold text-sm"><input type="checkbox" id="includeTax" class="toggle" checked> Include property tax</label>
+        <div><label class="text-xs font-semibold text-stone-500" for="annualTax">Annual property tax ($)</label><input id="annualTax" type="number" min="0" value="5400" class="mt-1 w-full border-2 border-stone-200 rounded-xl px-3 py-2"></div>
+        <label class="flex items-center gap-2 font-semibold text-sm"><input type="checkbox" id="includeInsurance" class="toggle" checked> Include home insurance</label>
+        <div><label class="text-xs font-semibold text-stone-500" for="annualInsurance">Annual insurance ($)</label><input id="annualInsurance" type="number" min="0" value="1800" class="mt-1 w-full border-2 border-stone-200 rounded-xl px-3 py-2"></div>
+        <label class="flex items-center gap-2 font-semibold text-sm"><input type="checkbox" id="includePMI" class="toggle"> Include PMI</label>
+        <div><label class="text-xs font-semibold text-stone-500" for="pmiRate">PMI rate (% of loan / yr)</label><input id="pmiRate" type="number" step="0.05" min="0" value="0.5" class="mt-1 w-full border-2 border-stone-200 rounded-xl px-3 py-2"></div>
+      </div>
+
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+        <label class="text-sm font-bold text-amber-900" for="extra">⚡ Extra-payment payoff boost ($ / month)</label>
+        <input id="extra" type="number" min="0" value="200" class="mt-2 w-full border-2 border-amber-200 rounded-xl px-3 py-2.5 bg-white">
+        <p class="text-xs text-amber-800 mt-2">Every extra dollar goes to principal. Watch the savings panel update instantly.</p>
+      </div>
+
+      <button id="calcBtn" class="w-full bg-[#7f1d1d] hover:bg-[#991b1b] text-white font-bold py-3 rounded-xl transition">Calculate Payment</button>
+      <p id="msg" class="text-sm font-semibold text-red-700 hidden" role="alert"></p>
+      <p id="emptyMsg" class="text-sm text-stone-500">Tip: change any number and your dashboard, donut and table refresh automatically.</p>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="lg:col-span-3 space-y-6">
+      <div class="grid sm:grid-cols-3 gap-4">
+        <div class="bg-[#7f1d1d] text-white rounded-3xl p-5 shadow-lg"><p class="text-xs uppercase tracking-wider opacity-80">Monthly payment</p><p id="statTotal" class="font-display text-3xl font-black mt-1">$0.00</p><p id="statLoan" class="text-xs opacity-80 mt-1">Loan $0</p></div>
+        <div class="bg-white rounded-3xl p-5 shadow border border-stone-200"><p class="text-xs uppercase tracking-wider text-stone-500">Total interest</p><p id="statInterest" class="font-display text-2xl font-black mt-1 text-stone-800">$0.00</p><p id="statPayoff" class="text-xs text-stone-500 mt-1">Payoff —</p></div>
+        <div class="bg-white rounded-3xl p-5 shadow border-2 border-amber-300"><p class="text-xs uppercase tracking-wider text-amber-700">Extra-payment savings</p><p id="statSaved" class="font-display text-2xl font-black mt-1 text-amber-700">$0.00</p><p id="statMonthsSaved" class="text-xs text-stone-500 mt-1">0 months sooner</p></div>
+      </div>
+
+      <div class="bg-white rounded-3xl shadow border border-stone-200 p-6 grid sm:grid-cols-2 gap-6 items-center">
+        <div class="relative mx-auto" style="width:220px;height:220px">
+          <svg id="donut" viewBox="0 0 200 200" width="220" height="220" role="img" aria-label="Monthly payment breakdown donut chart"></svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-xs text-stone-500">per month</span><span id="donutCenter" class="font-display font-black text-xl text-[#7f1d1d]">$0</span></div>
+        </div>
+        <div><h3 class="font-display font-bold text-lg text-[#7f1d1d] mb-3">Where each payment goes</h3><ul id="legend" class="space-y-2 text-sm"></ul></div>
+      </div>
+
+      <div class="bg-white rounded-3xl shadow border border-stone-200 p-6">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h3 class="font-display font-bold text-lg text-[#7f1d1d]">Amortization table</h3>
+          <button id="csvBtn" class="bg-stone-800 hover:bg-stone-900 text-white text-sm font-bold px-4 py-2 rounded-lg">⬇ Download CSV</button>
+        </div>
+        <div class="overflow-auto max-h-96 mt-4 border rounded-xl">
+          <table class="w-full text-sm min-w-[640px]"><thead class="bg-stone-100 sticky top-0"><tr><th class="text-left p-2">Month</th><th class="text-right p-2">Payment</th><th class="text-right p-2">Principal</th><th class="text-right p-2">Interest</th><th class="text-right p-2">Tax+Ins+PMI</th><th class="text-right p-2">Balance</th></tr></thead><tbody id="tbody"></tbody></table>
+        </div>
+        <p id="tableNote" class="text-xs text-stone-500 mt-2"></p>
+      </div>
+    </div>
+  </section>
+
+  <article id="seo-article" class="mt-14 bg-white rounded-3xl shadow border border-stone-200 p-6 sm:p-10 prose max-w-none">
+    <h2 class="font-display text-3xl font-black text-[#7f1d1d]">Mortgage Calculator Guide: Understanding Your True Monthly Payment</h2>
+    <p class="mt-4 leading-relaxed">A mortgage payment is rarely just a mortgage payment. When most buyers first estimate what a home will cost each month, they run a quick calculation on the loan amount, the interest rate and the term, and they arrive at a tidy figure for principal and interest. That figure is real, but it is incomplete. The amount that actually leaves your bank account each month usually also includes property tax, home insurance and, for buyers who put down less than twenty percent, private mortgage insurance. MortgageMate was built to show the whole picture in one dashboard, so the number you plan around is the number you will actually pay. This guide explains how each part of the payment works, how amortization quietly shifts money from interest to principal over time, and how a modest extra payment can save you a surprising amount of money and years.</p>
+    <h3 class="font-display text-xl font-bold mt-6 text-[#7f1d1d]">Principal and interest: the core of the loan</h3>
+    <p class="mt-3 leading-relaxed">Principal is the amount you borrowed. Interest is the price the lender charges for lending it. For a fixed-rate loan, the combined principal-and-interest payment stays the same every month, which makes budgeting predictable. What changes inside that payment is the split. In the early years, most of each payment is interest, because interest is charged on a large remaining balance. As the balance falls, a growing share of the same payment becomes principal, so equity builds faster and faster toward the end of the loan. This slow shift is called amortization, and it is why two borrowers with identical payments can be in very different positions after five years depending on their rate and term. A lower rate means less of the early payment is consumed by interest. A shorter term means a higher payment, but a much faster march toward owning the home outright.</p>
+    <p class="mt-3 leading-relaxed">The mathematics behind the payment is a standard annuity formula. The loan amount is combined with the monthly interest rate and the total number of monthly payments to produce a level payment that exactly retires the debt on the final scheduled month, assuming no extra payments. MortgageMate applies that formula instantly whenever you change the home price, down payment, rate or term, so you can test scenarios in seconds. Try nudging the rate by half a percent and watch the total interest change by thousands of dollars. That sensitivity is exactly why shopping for a rate, improving your credit before you apply, and comparing lender fees matter so much in real life.</p>
+    <h3 class="font-display text-xl font-bold mt-6 text-[#7f1d1d]">Property tax: the payment that follows your home's value</h3>
+    <p class="mt-3 leading-relaxed">Property tax is charged by local governments and is usually calculated as a percentage of your home's assessed value each year. Rates vary enormously by location: one county might charge well under one percent while another charges more than two percent. On a mid-priced home, that difference can be several hundred dollars every month. Most lenders collect tax through an escrow account, adding one twelfth of the estimated annual bill to your monthly payment and paying the tax authority when the bill comes due. Because tax is tied to value, it can rise over time as assessments increase, even though your loan payment itself never changes. Including a realistic tax estimate in MortgageMate protects you from the common shock of qualifying for a loan on principal and interest alone, then discovering the escrowed total is far higher than you budgeted for.</p>
+    <h3 class="font-display text-xl font-bold mt-6 text-[#7f1d1d]">Home insurance: protection priced into every month</h3>
+    <p class="mt-3 leading-relaxed">Home insurance protects the structure and your belongings against fire, storm damage, theft and liability claims. Lenders require it because the home is the collateral for the loan. Like tax, the annual premium is usually divided by twelve and collected through escrow. Premiums depend on the home's replacement cost, its age and materials, local weather risks, and the coverage and deductible you choose. A higher deductible usually lowers the premium but raises what you pay out of pocket after a loss. When you compare homes, remember that an older roof or a location exposed to floods or wildfires can push insurance costs up sharply. MortgageMate lets you toggle insurance on and adjust the annual premium so your estimate reflects the specific house you are considering, not a generic average.</p>
+    <h3 class="font-display text-xl font-bold mt-6 text-[#7f1d1d]">PMI: what it is, why it exists, and how it ends</h3>
+    <p class="mt-3 leading-relaxed">Private mortgage insurance, known as PMI, protects the lender — not you — if you stop paying and the sale of the home does not cover the loan. It is typically required on conventional loans when the down payment is below twenty percent of the price. PMI is quoted as an annual percentage of the loan amount and paid monthly. The cost depends on your credit profile and how small your down payment is; a three percent down payment carries more risk and therefore a higher PMI rate than fifteen percent down. The good news is that PMI is not forever. Once your balance falls to eighty percent of the home's original value, you can generally request removal, and it must automatically terminate at seventy-eight percent under the original schedule. In MortgageMate, PMI is applied only while the balance sits above the eighty percent threshold, so you can see it drop away in the amortization table and feel the payment lighten at exactly the right month. If you start with twenty percent down or more, simply leave PMI off.</p>
+    <h3 class="font-display text-xl font-bold mt-6 text-[#7f1d1d]">The extra-payment payoff boost</h3>
+    <p class="mt-3 leading-relaxed">Extra payments are the most powerful lever most homeowners never use. Because interest is charged on the remaining balance, any extra amount paid toward principal today removes interest charges on that amount for every remaining month of the loan. The effect compounds quietly: the balance falls faster, so next month's interest is smaller, so more of the regular payment becomes principal, and so on. Adding even a modest amount each month — the equivalent of a streaming bundle or a couple of takeaway meals — can shorten a thirty-year loan by several years and save tens of thousands in interest. MortgageMate makes this visible. Enter an extra monthly amount and the dashboard immediately shows the interest saved and how many months sooner you will be mortgage-free compared with the same loan without the boost. Before committing to extra payments in real life, check that your loan has no prepayment penalty, confirm with your servicer that extra funds are applied to principal, and keep a healthy emergency fund first. Paying down a mortgage is a guaranteed return equal to your interest rate, but your home equity is not as easy to reach in an emergency as cash in a savings account, so balance matters.</p>
+    <h3 class="font-display text-xl font-bold mt-6 text-[#7f1d1d]">Reading the amortization table</h3>
+    <p class="mt-3 leading-relaxed">The amortization table is the full story of your loan, month by month. Each row shows the payment, how much went to principal, how much to interest, the escrowed tax, insurance and PMI, and the balance that remains. Scanning the first rows shows how interest-heavy early payments are; scanning later rows shows the satisfying reversal. The table is also a planning tool. Find the month your balance crosses below eighty percent of the price and you have found when PMI should end. Find the year your balance halves. Compare the total interest column between a fifteen-year and a thirty-year scenario and the term decision stops being abstract. MortgageMate lets you download the entire schedule as a CSV file, so you can open it in a spreadsheet, chart it, share it with a partner or adviser, or keep it as a record alongside your loan documents.</p>
+    <h3 class="font-display text-xl font-bold mt-6 text-[#7f1d1d]">Choosing a term: fifteen, twenty, or thirty years</h3>
+    <p class="mt-3 leading-relaxed">Term choice is a trade-off between monthly breathing room and lifetime cost. A thirty-year term gives the lowest payment, which can make a home affordable and leave cash for other goals, but you pay interest for three decades. A fifteen-year term demands a much higher payment yet builds equity rapidly and usually carries a lower rate, so the total interest can be less than half. A twenty-year term sits between the two and is often overlooked. There is no universally right answer. If the higher payment would leave you house-poor with no savings, the longer term plus voluntary extra payments — which you can pause in a hard month — may be the wiser, more flexible path. Use MortgageMate to run all three terms on your real numbers and judge the trade-off with your own budget in front of you, not a rule of thumb.</p>
+    <h3 class="font-display text-xl font-bold mt-6 text-[#7f1d1d]">Down payment decisions</h3>
+    <p class="mt-3 leading-relaxed">A larger down payment reduces the loan, the monthly payment, the total interest, and — at the twenty percent line — removes PMI entirely. But draining every dollar of savings to reach twenty percent can leave you exposed to moving costs, repairs and life's surprises. Many buyers find a middle path: put down enough to keep the payment comfortable, keep a reserve, and then attack the balance with extra payments until PMI falls away. Watch the loan-to-value figure as you adjust the down payment in the calculator. Each dollar down is a dollar you never pay interest on, for the entire life of the loan, which is why the down payment slider is one of the most satisfying controls to experiment with.</p>
+    <h3 class="font-display text-xl font-bold mt-6 text-[#7f1d1d]">What this calculator does and does not do</h3>
+    <p class="mt-3 leading-relaxed">MortgageMate estimates a fixed-rate, fully amortizing loan with monthly payments. It assumes tax, insurance and PMI rates stay constant, although in reality tax assessments and insurance premiums change over time, and PMI removal depends on your servicer's process and your home's value. It does not include closing costs, lender fees, homeowners association dues, or the tax treatment of mortgage interest, which depends on your personal situation. Treat the results as a clear, honest planning estimate — excellent for comparing scenarios and setting a budget — and confirm final figures with your lender's official loan estimate before you sign. Used that way, a few minutes with this dashboard can prevent years of payment surprise, and that is exactly what it was built for.</p>
+
+    <h2 class="font-display text-2xl font-black text-[#7f1d1d] mt-10">Frequently Asked Questions</h2>
+    <div class="space-y-4 mt-4">
+      <div><h3 class="font-bold">How is my monthly mortgage payment calculated?</h3><p class="mt-1 leading-relaxed">Your monthly payment combines principal and interest on the loan with, if you include them, property tax, home insurance and PMI divided across twelve months. MortgageMate shows each part separately so you can see exactly where every dollar goes.</p></div>
+      <div><h3 class="font-bold">What is PMI and when does it stop?</h3><p class="mt-1 leading-relaxed">Private mortgage insurance, or PMI, protects the lender when your down payment is under 20 percent. In MortgageMate PMI is applied while your remaining balance is above 80 percent of the home price and drops away once you cross that threshold.</p></div>
+      <div><h3 class="font-bold">How much can extra monthly payments save me?</h3><p class="mt-1 leading-relaxed">Extra payments go straight to principal, so every extra dollar reduces the balance that interest is charged on. MortgageMate compares your loan with and without the extra amount and shows the interest saved and the months shaved off your payoff date.</p></div>
+      <div><h3 class="font-bold">Should I include property tax and insurance in my estimate?</h3><p class="mt-1 leading-relaxed">Yes, if you want a realistic monthly budget. Tax and insurance can add hundreds of dollars a month. Most lenders collect them through escrow, so including them in MortgageMate gives you the true amount that will leave your account.</p></div>
+      <div><h3 class="font-bold">What is an amortization table and how do I use it?</h3><p class="mt-1 leading-relaxed">An amortization table lists every monthly payment, splitting it into principal, interest, tax, insurance and PMI, and shows your remaining balance after each payment. You can download it as a CSV file from MortgageMate to open in any spreadsheet.</p></div>
+      <div><h3 class="font-bold">Does a shorter loan term really save that much interest?</h3><p class="mt-1 leading-relaxed">Yes. A 15-year loan has a higher monthly payment than a 30-year loan on the same amount, but you pay far less total interest because the balance falls faster and the rate is often lower. Try both terms in MortgageMate to compare the totals side by side.</p></div>
+    </div>
+  </article>
+</main>
+
+<div class="no-print mx-auto max-w-6xl px-4 sm:px-6 pb-4" role="complementary" aria-label="Advertisement">
+  <div class="mx-auto text-center" style="max-width:728px">
+    <span class="block text-[10px] tracking-[0.18em] uppercase text-slate-400 mb-1.5">Advertisement</span>
+    <div class="flex justify-center overflow-hidden">
+      <script async src="https://js.wpadmngr.com/static/adManager.js" data-admpid="464498"></script>
+    </div>
+  </div>
+</div>
+
+<footer class="border-t bg-white py-6 text-center text-sm text-stone-500">MortgageMate — estimates for planning only, not a lending offer. Confirm final figures with your lender.</footer>
+
+<script id="lib-mortgagemate">
+var MortgageMateLib = {
+  monthlyPI: function(principal, annualRatePct, termYears) {
+    principal = Number(principal); annualRatePct = Number(annualRatePct); termYears = Number(termYears);
+    if (!isFinite(principal) || !isFinite(annualRatePct) || !isFinite(termYears) || principal <= 0 || termYears <= 0 || annualRatePct < 0) return 0;
+    var n = Math.round(termYears * 12);
+    var r = annualRatePct / 100 / 12;
+    if (r === 0) return principal / n;
+    var f = Math.pow(1 + r, n);
+    return principal * r * f / (f - 1);
+  },
+  loanAmount: function(homePrice, downPayment) {
+    homePrice = Number(homePrice) || 0; downPayment = Number(downPayment) || 0;
+    if (homePrice <= 0) return 0;
+    if (downPayment < 0) downPayment = 0;
+    if (downPayment > homePrice) downPayment = homePrice;
+    return homePrice - downPayment;
+  },
+  ltvPercent: function(homePrice, loan) {
+    homePrice = Number(homePrice) || 0; loan = Number(loan) || 0;
+    if (homePrice <= 0) return 0;
+    return loan / homePrice * 100;
+  },
+  pmiApplies: function(balance, homePrice) {
+    if (!homePrice || homePrice <= 0) return false;
+    return balance > 0.80 * homePrice;
+  },
+  monthlyEscrow: function(opts) {
+    opts = opts || {};
+    var tax = opts.includeTax ? (Number(opts.annualTax) || 0) / 12 : 0;
+    var ins = opts.includeInsurance ? (Number(opts.annualInsurance) || 0) / 12 : 0;
+    var pmi = 0;
+    if (opts.includePMI) {
+      var loan = Number(opts.loan) || 0;
+      var rate = Number(opts.pmiRatePct) || 0;
+      pmi = loan * (rate / 100) / 12;
+    }
+    return { tax: tax, insurance: ins, pmi: pmi, total: tax + ins + pmi };
+  },
+  buildSchedule: function(opts) {
+    opts = opts || {};
+    var principal = Number(opts.principal) || 0;
+    var ratePct = Number(opts.annualRatePct) || 0;
+    var years = Number(opts.termYears) || 0;
+    var extra = Math.max(0, Number(opts.extraMonthly) || 0);
+    var homePrice = Number(opts.homePrice) || 0;
+    if (principal <= 0 || years <= 0 || ratePct < 0) return [];
+    var r = ratePct / 100 / 12;
+    var pi = MortgageMateLib.monthlyPI(principal, ratePct, years);
+    var esc = MortgageMateLib.monthlyEscrow(opts);
+    var taxM = esc.tax, insM = esc.insurance;
+    var balance = principal;
+    var schedule = [];
+    var month = 0;
+    var maxMonths = Math.round(years * 12) + 600;
+    while (balance > 0.005 && month < maxMonths) {
+      month++;
+      var interest = balance * r;
+      var principalPay = pi - interest;
+      if (principalPay < 0) principalPay = 0;
+      var extraPay = extra;
+      var totalPrincipal = principalPay + extraPay;
+      if (totalPrincipal > balance) { extraPay = Math.max(0, balance - principalPay); totalPrincipal = balance; if (principalPay > balance) { principalPay = balance; extraPay = 0; totalPrincipal = balance; } }
+      var pmiM = 0;
+      if (opts.includePMI && MortgageMateLib.pmiApplies(balance, homePrice)) {
+        pmiM = (Number(opts.loan || principal) || principal) * ((Number(opts.pmiRatePct) || 0) / 100) / 12;
+      } else if (opts.includePMI && !homePrice) {
+        pmiM = esc.pmi;
+      }
+      var payment = principalPay + interest + extraPay + taxM + insM + pmiM;
+      balance = Math.max(0, balance - totalPrincipal);
+      schedule.push({ month: month, payment: payment, principal: totalPrincipal, basePrincipal: principalPay, extra: extraPay, interest: interest, tax: taxM, insurance: insM, pmi: pmiM, balance: balance });
+      if (month >= Math.round(years * 12) && extra === 0) break;
+    }
+    return schedule;
+  },
+  summarize: function(opts) {
+    opts = opts || {};
+    var principal = Number(opts.principal) || 0;
+    var pi = MortgageMateLib.monthlyPI(principal, Number(opts.annualRatePct) || 0, Number(opts.termYears) || 0);
+    var withExtra = MortgageMateLib.buildSchedule(opts);
+    var baseOpts = {}; for (var k in opts) baseOpts[k] = opts[k]; baseOpts.extraMonthly = 0;
+    var without = MortgageMateLib.buildSchedule(baseOpts);
+    function totals(s) { var ti = 0, tp = 0; for (var i = 0; i < s.length; i++) { ti += s[i].interest; tp += s[i].payment; } return { interest: ti, paid: tp, months: s.length }; }
+    var tW = totals(withExtra), tB = totals(without);
+    var esc = MortgageMateLib.monthlyEscrow(opts);
+    // First month PMI for summary (if applies)
+    var firstPmi = withExtra.length ? withExtra[0].pmi : esc.pmi;
+    var monthlyTotal = pi + esc.tax + esc.insurance + firstPmi;
+    return {
+      loan: principal, monthlyPI: pi, monthlyTax: esc.tax, monthlyInsurance: esc.insurance, monthlyPMI: firstPmi,
+      monthlyTotal: monthlyTotal, schedule: withExtra, baseSchedule: without,
+      payoffMonths: tW.months, basePayoffMonths: tB.months, monthsSaved: Math.max(0, tB.months - tW.months),
+      totalInterest: tW.interest, baseTotalInterest: tB.interest, interestSaved: Math.max(0, tB.interest - tW.interest),
+      totalPaid: tW.paid
+    };
+  },
+  donutSegments: function(summary) {
+    if (!summary) return [];
+    var parts = [
+      { label: 'Principal & Interest', value: summary.monthlyPI || 0, color: '#7f1d1d' },
+      { label: 'Property Tax', value: summary.monthlyTax || 0, color: '#d97706' },
+      { label: 'Home Insurance', value: summary.monthlyInsurance || 0, color: '#78716c' },
+      { label: 'PMI', value: summary.monthlyPMI || 0, color: '#be185d' }
+    ];
+    var total = parts.reduce(function(a, p) { return a + p.value; }, 0);
+    if (total <= 0) return parts.map(function(p) { return { label: p.label, value: 0, color: p.color, pct: 0 }; });
+    return parts.map(function(p) { return { label: p.label, value: p.value, color: p.color, pct: p.value / total * 100 }; });
+  },
+  scheduleToCSV: function(schedule) {
+    var lines = ['Month,Payment,Principal,Extra,Interest,Tax,Insurance,PMI,Balance'];
+    (schedule || []).forEach(function(row) {
+      lines.push([row.month, row.payment.toFixed(2), row.principal.toFixed(2), (row.extra || 0).toFixed(2), row.interest.toFixed(2), (row.tax || 0).toFixed(2), (row.insurance || 0).toFixed(2), (row.pmi || 0).toFixed(2), row.balance.toFixed(2)].join(','));
+    });
+    return lines.join('\n');
+  },
+  validate: function(opts) {
+    opts = opts || {}; var errors = [];
+    if (!(Number(opts.homePrice) > 0)) errors.push('Enter a home price greater than zero.');
+    if (Number(opts.downPayment) < 0) errors.push('Down payment cannot be negative.');
+    if (Number(opts.downPayment) >= Number(opts.homePrice) && Number(opts.homePrice) > 0) errors.push('Down payment must be less than the home price.');
+    if (!(Number(opts.annualRatePct) >= 0) || Number(opts.annualRatePct) > 30) errors.push('Enter an interest rate between 0% and 30%.');
+    if (!(Number(opts.termYears) > 0) || Number(opts.termYears) > 50) errors.push('Enter a loan term between 1 and 50 years.');
+    return errors;
+  },
+  formatMoney: function(n) {
+    if (!isFinite(n)) return '$0.00';
+    return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+};
+if (typeof module !== 'undefined' && module.exports) { module.exports = MortgageMateLib; }
+
+</script>
+<script>
+var L = MortgageMateLib;
+function $(id){return document.getElementById(id);}
+function num(id){var v=parseFloat($(id).value);return isFinite(v)?v:0;}
+function money(n){return L.formatMoney(n);}
+var currentSummary=null;
+function drawDonut(segs,total){
+  var svg=$('donut'); var C=2*Math.PI*70; var offset=0; var html='';
+  html+='<circle cx="100" cy="100" r="70" fill="none" stroke="#e7e5e4" stroke-width="28"/>';
+  segs.forEach(function(s){
+    if(s.value<=0) return;
+    var len=s.value/total*C;
+    html+='<circle cx="100" cy="100" r="70" fill="none" stroke="'+s.color+'" stroke-width="28" stroke-dasharray="'+Math.max(0,len-2)+' '+C+'" stroke-dashoffset="'+(-offset)+'" transform="rotate(-90 100 100)"/>';
+    offset+=len;
+  });
+  svg.innerHTML=html;
+  $('legend').innerHTML=segs.map(function(s){return '<li class="flex items-center justify-between gap-3"><span class="flex items-center gap-2"><span class="donut-legend-dot" style="background:'+s.color+'"></span>'+s.label+'</span><strong>'+money(s.value)+' · '+s.pct.toFixed(1)+'%</strong></li>';}).join('');
+  $('donutCenter').textContent=money(total);
+}
+function calculate(){
+  var opts={homePrice:num('homePrice'),downPayment:num('downPayment'),annualRatePct:num('rate'),termYears:num('term'),
+    annualTax:num('annualTax'),annualInsurance:num('annualInsurance'),pmiRatePct:num('pmiRate'),
+    includeTax:$('includeTax').checked,includeInsurance:$('includeInsurance').checked,includePMI:$('includePMI').checked,
+    extraMonthly:Math.max(0,num('extra'))};
+  var errs=L.validate(opts);
+  var msg=$('msg');
+  if(errs.length){msg.textContent=errs[0];msg.classList.remove('hidden');return;}
+  msg.classList.add('hidden');
+  var loan=L.loanAmount(opts.homePrice,opts.downPayment);
+  opts.principal=loan; opts.loan=loan;
+  var s=L.summarize(opts); currentSummary=s;
+  $('statTotal').textContent=money(s.monthlyTotal + (opts.extraMonthly||0)*0); // extra shown separately in table; total is scheduled
+  // Show total including extra for honesty when extra present
+  if(opts.extraMonthly>0) $('statTotal').textContent=money(s.monthlyTotal+opts.extraMonthly);
+  $('statLoan').textContent='Loan '+money(loan)+' · '+L.ltvPercent(opts.homePrice,loan).toFixed(1)+'% LTV';
+  $('statInterest').textContent=money(s.totalInterest);
+  var years=Math.floor(s.payoffMonths/12), mos=s.payoffMonths%12;
+  $('statPayoff').textContent='Payoff in '+s.payoffMonths+' months ('+years+'y '+mos+'m)';
+  $('statSaved').textContent=money(s.interestSaved);
+  $('statMonthsSaved').textContent=s.monthsSaved+' months sooner with extra payments';
+  var segs=L.donutSegments(s);
+  drawDonut(segs, s.monthlyTotal);
+  var rows=s.schedule.map(function(r){return '<tr class="border-t hover:bg-amber-50"><td class="p-2">'+r.month+'</td><td class="p-2 text-right">'+money(r.payment)+'</td><td class="p-2 text-right">'+money(r.principal)+'</td><td class="p-2 text-right">'+money(r.interest)+'</td><td class="p-2 text-right">'+money(r.tax+r.insurance+r.pmi)+'</td><td class="p-2 text-right font-semibold">'+money(r.balance)+'</td></tr>';}).join('');
+  $('tbody').innerHTML=rows;
+  $('tableNote').textContent=s.schedule.length+' monthly payments shown. PMI, when included, stops once the balance reaches 80% of the home price.';
+}
+function syncDownPct(fromPct){
+  var hp=num('homePrice');
+  if(fromPct){ $('downPayment').value=Math.round(hp*num('downPct')/100); }
+  else { $('downPct').value=hp>0?(num('downPayment')/hp*100).toFixed(1):0; }
+}
+['homePrice','downPayment','rate','annualTax','annualInsurance','pmiRate','extra'].forEach(function(id){$(id).addEventListener('input',function(){if(id==='downPayment')syncDownPct(false); if(id==='homePrice')syncDownPct(false); calculate();});});
+$('downPct').addEventListener('input',function(){syncDownPct(true);calculate();});
+['term','includeTax','includeInsurance','includePMI'].forEach(function(id){$(id).addEventListener('change',calculate);});
+$('calcBtn').addEventListener('click',calculate);
+$('csvBtn').addEventListener('click',function(){
+  if(!currentSummary){calculate();}
+  var csv=L.scheduleToCSV(currentSummary.schedule);
+  var blob=new Blob([csv],{type:'text/csv'}); var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='mortgagemate-amortization.csv'; a.click(); URL.revokeObjectURL(a.href);
+});
+calculate();
+</script>
+</body>
+</html>
